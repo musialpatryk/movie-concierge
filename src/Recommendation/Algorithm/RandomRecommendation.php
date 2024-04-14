@@ -20,7 +20,14 @@ class RandomRecommendation implements RecommendationAlgorithmInterface
      */
     public function recommend(array $recommendable): array
     {
-        $randomKeys = array_rand($recommendable, self::RANDOM_RECOMMENDATIONS_COUNT);
+        if (count($recommendable) <= self::RANDOM_RECOMMENDATIONS_COUNT) {
+            return $recommendable;
+        }
+
+        $randomKeys = array_rand(
+            $recommendable,
+            self::RANDOM_RECOMMENDATIONS_COUNT
+        );
 
         $randomRecommendable = [];
         foreach ($randomKeys as $key) {
