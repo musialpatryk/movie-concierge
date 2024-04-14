@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Recommendation\Service;
 
+use App\Recommendation\Interface\RecommendableInterface;
 use App\Recommendation\Interface\RecommendableProviderInterface;
 use App\Recommendation\Interface\RecommendationAlgorithmInterface;
 use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
@@ -22,10 +23,25 @@ readonly class RecommendationGenerator {
     }
 
     /**
-     * @return string[]
+     * @return RecommendableInterface[]|null
      */
-    public function generate(): array {
-        return $this->recommendableProvider->getAll();
+    public function generate(string $algorithmName): ?array {
+        $algorithm = $this->getAlgorithmByName($algorithmName);
+
+        return $algorithm?->recommend(
+            $this->recommendableProvider->getAll()
+        );
+
+    }
+
+    private function getAlgorithmByName(string $name): RecommendationAlgorithmInterface|null {
+        foreach ($this->recommendationAlgorithms as $recommendationAlgorithm) {
+            if ($recommendationAlgorithm->getName() === $name) {
+                return $recommendationAlgorithm;
+            }
+        }
+
+        return null;
     }
 
     /**

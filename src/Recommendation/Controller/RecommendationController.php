@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Recommendation\Controller;
 
+use App\Recommendation\Interface\RecommendableInterface;
 use App\Recommendation\Service\RecommendationGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 class RecommendationController extends AbstractController
@@ -16,10 +19,23 @@ class RecommendationController extends AbstractController
     }
 
     #[Route('/api/recommendations', name: 'api_recommendations')]
-    public function getRecommended(): Response
+    public function getRecommended(#[MapQueryParameter] ?string $algorithmName): Response
     {
+        if (!$algorithmName) {
+            throw new BadRequestException();
+        }
+
+        $recommendations = $this->recommendationGenerator->generate($algorithmName);
+
+        if (null === $recommendations) {
+            throw new BadRequestException();
+        }
+
         return $this->json(
-            $this->recommendationGenerator->generate()
+            array_map(
+                static fn(RecommendableInterface $recommendable): string => $recommendable->getTitle(),
+                $recommendations
+            )
         );
     }
 
