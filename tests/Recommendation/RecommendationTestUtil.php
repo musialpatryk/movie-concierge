@@ -7,7 +7,7 @@ use App\Recommendation\Interface\RecommendableInterface;
 abstract class RecommendationTestUtil
 {
     /**
-     * @return string[]
+     * @return RecommendableInterface[]
      */
     public static function getRecommendableFromTitles(string ...$titles): array
     {
